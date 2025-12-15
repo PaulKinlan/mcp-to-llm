@@ -7,7 +7,13 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { loadConfig } from './config.js';
-import { initializeProvider, promptModel, ProviderInstance } from './providers.js';
+import { initializeProvider, promptModel, ProviderInstance, PromptOptions } from './providers.js';
+
+interface PromptArgs extends PromptOptions {
+  providerId: string;
+  model: string;
+  prompt: string;
+}
 
 /**
  * MCP Server for LLM access via AI SDK
@@ -132,8 +138,13 @@ class LLMServer {
     };
   }
 
-  private async handlePrompt(args: any) {
-    const { providerId, model, prompt, systemPrompt, temperature, maxTokens } = args;
+  private async handlePrompt(args: unknown) {
+    // Type guard to validate args structure
+    if (typeof args !== 'object' || args === null) {
+      throw new Error('Invalid arguments: expected an object');
+    }
+
+    const { providerId, model, prompt, systemPrompt, temperature, maxTokens } = args as PromptArgs;
 
     if (!providerId || !model || !prompt) {
       throw new Error('Missing required arguments: providerId, model, and prompt are required');

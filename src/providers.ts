@@ -2,7 +2,7 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText, LanguageModel } from 'ai';
-import { ProviderConfig } from './config';
+import { ProviderConfig } from './config.js';
 
 export interface ProviderInstance {
   id: string;
@@ -10,6 +10,8 @@ export interface ProviderInstance {
   models: string[];
   getModel: (modelId: string) => LanguageModel;
 }
+
+type ProviderFactory = (modelId: string) => LanguageModel;
 
 /**
  * Default models for each provider if not specified in config
@@ -26,7 +28,7 @@ const DEFAULT_MODELS: Record<string, string[]> = {
 export function initializeProvider(config: ProviderConfig): ProviderInstance {
   const models = config.models || DEFAULT_MODELS[config.provider] || [];
   
-  let provider: any;
+  let provider: ProviderFactory;
   
   switch (config.provider) {
     case 'openai':
@@ -62,6 +64,12 @@ export function initializeProvider(config: ProviderConfig): ProviderInstance {
   };
 }
 
+export interface PromptOptions {
+  systemPrompt?: string;
+  temperature?: number;
+  maxTokens?: number;
+}
+
 /**
  * Generate text using a specific provider and model
  */
@@ -69,11 +77,7 @@ export async function promptModel(
   providerInstance: ProviderInstance,
   modelId: string,
   prompt: string,
-  options?: {
-    systemPrompt?: string;
-    temperature?: number;
-    maxTokens?: number;
-  }
+  options?: PromptOptions
 ): Promise<string> {
   const model = providerInstance.getModel(modelId);
   
@@ -85,15 +89,12 @@ export async function promptModel(
   
   messages.push({ role: 'user', content: prompt });
   
-  const generateOptions: any = {
+  const generateOptions: Parameters<typeof generateText>[0] = {
     model,
     messages,
-    temperature: options?.temperature,
+    ...(options?.temperature !== undefined && { temperature: options.temperature }),
+    ...(options?.maxTokens !== undefined && { maxTokens: options.maxTokens }),
   };
-  
-  if (options?.maxTokens) {
-    generateOptions.maxTokens = options.maxTokens;
-  }
   
   const result = await generateText(generateOptions);
   
