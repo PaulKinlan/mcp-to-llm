@@ -26,7 +26,11 @@ const DEFAULT_MODELS: Record<string, string[]> = {
  * Initialize a provider instance based on configuration
  */
 export function initializeProvider(config: ProviderConfig): ProviderInstance {
-  const models = config.models || DEFAULT_MODELS[config.provider] || [];
+  const models = config.models || DEFAULT_MODELS[config.provider];
+  
+  if (!models || models.length === 0) {
+    throw new Error(`No models configured for provider ${config.id} and no default models available`);
+  }
   
   let provider: ProviderFactory;
   

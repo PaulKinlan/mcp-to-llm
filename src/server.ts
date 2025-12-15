@@ -6,6 +6,7 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
+import { z } from 'zod';
 import { loadConfig } from './config.js';
 import { initializeProvider, promptModel, ProviderInstance, PromptOptions } from './providers.js';
 
@@ -14,6 +15,16 @@ interface PromptArgs extends PromptOptions {
   model: string;
   prompt: string;
 }
+
+// Validation schema for prompt arguments
+const PromptArgsSchema = z.object({
+  providerId: z.string().min(1),
+  model: z.string().min(1),
+  prompt: z.string().min(1),
+  systemPrompt: z.string().optional(),
+  temperature: z.number().min(0).max(2).optional(),
+  maxTokens: z.number().positive().optional(),
+});
 
 /**
  * MCP Server for LLM access via AI SDK
@@ -48,7 +59,7 @@ class LLMServer {
         this.providers.set(provider.id, provider);
       }
       
-      console.error(`Initialized ${this.providers.size} provider(s)`);
+      console.log(`Initialized ${this.providers.size} provider(s)`);
     } catch (error) {
       console.error('Failed to load configuration:', error);
       process.exit(1);
@@ -139,16 +150,14 @@ class LLMServer {
   }
 
   private async handlePrompt(args: unknown) {
-    // Type guard to validate args structure
-    if (typeof args !== 'object' || args === null) {
-      throw new Error('Invalid arguments: expected an object');
+    // Validate arguments with Zod schema
+    const validationResult = PromptArgsSchema.safeParse(args);
+    
+    if (!validationResult.success) {
+      throw new Error(`Invalid arguments: ${validationResult.error.message}`);
     }
 
-    const { providerId, model, prompt, systemPrompt, temperature, maxTokens } = args as PromptArgs;
-
-    if (!providerId || !model || !prompt) {
-      throw new Error('Missing required arguments: providerId, model, and prompt are required');
-    }
+    const { providerId, model, prompt, systemPrompt, temperature, maxTokens } = validationResult.data;
 
     const provider = this.providers.get(providerId);
     if (!provider) {

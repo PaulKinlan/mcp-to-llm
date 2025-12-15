@@ -20,7 +20,7 @@ try {
   for (const providerConfig of config.providers) {
     console.log(`Testing provider: ${providerConfig.id}`);
     console.log(`  Type: ${providerConfig.provider}`);
-    console.log(`  API Key: ${providerConfig.apiKey.substring(0, 10)}...`);
+    console.log(`  API Key: ${providerConfig.apiKey ? '***' : '(not set)'}`);
     
     if (providerConfig.baseURL) {
       console.log(`  Base URL: ${providerConfig.baseURL}`);
