@@ -10,7 +10,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
+    "start:http": "node dist/server.js --http",
     "dev": "tsx src/server.ts",
+    "dev:http": "tsx src/server.ts --http",
     "test": "echo \"Error: no test specified\" && exit 1",
     "test-config": "tsx src/test-config.ts",
     "example": "tsx examples/client-example.ts"
@@ -29,7 +31,9 @@
     "@ai-sdk/anthropic": "^2.0.56",
     "@ai-sdk/google": "^2.0.46",
     "@ai-sdk/openai": "^2.0.86",
+    "@types/express": "^5.0.6",
     "ai": "^5.0.113",
+    "express": "^5.2.1",
     "zod": "^4.2.0"
   },
   "devDependencies": {

@@ -100,6 +100,12 @@ export MCP_LLM_CONFIG=/path/to/custom/config.json
 
 ### Running the Server
 
+The server supports two transport modes:
+
+#### 1. Stdio Transport (Default)
+
+For use with MCP clients like Claude Desktop:
+
 ```bash
 npm start
 ```
@@ -109,6 +115,34 @@ Or in development mode:
 ```bash
 npm run dev
 ```
+
+#### 2. HTTP Transport (SSE)
+
+For hosting as a web service:
+
+```bash
+npm run start:http
+```
+
+Or in development mode:
+
+```bash
+npm run dev:http
+```
+
+By default, the HTTP server listens on `http://127.0.0.1:3000`. You can customize the port and host:
+
+```bash
+# Custom port
+node dist/server.js --http --port 8080
+
+# Custom host (bind to all interfaces)
+node dist/server.js --http --host 0.0.0.0 --port 8080
+```
+
+The HTTP server provides:
+- SSE endpoint: `http://host:port/sse` (for MCP client connections)
+- Health check: `http://host:port/health` (for monitoring)
 
 ### MCP Tools
 
@@ -168,6 +202,7 @@ This MCP server enables several useful scenarios:
 3. **Cost Optimization**: Route different types of requests to different providers based on cost/performance
 4. **Failover**: Configure backup providers in case one is unavailable
 5. **Model Testing**: Test and compare different models from the same or different providers
+6. **Web Service Deployment**: Host the server as a web service for remote access via HTTP/SSE transport
 
 ## Development
 

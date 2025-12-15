@@ -64,6 +64,10 @@ After updating the configuration, restart Claude Desktop.
 
 ## Using with Other MCP Clients
 
+The server supports two transport modes: **stdio** (for local processes) and **HTTP/SSE** (for web services).
+
+### Stdio Transport
+
 The server uses stdio transport and can be integrated with any MCP-compatible client. Here's a generic example:
 
 ```javascript
@@ -103,6 +107,37 @@ const promptResult = await client.callTool({
     temperature: 0.7
   }
 });
+```
+
+### HTTP/SSE Transport
+
+For hosting as a web service, use the HTTP transport mode:
+
+```bash
+# Start server on default port (3000)
+npm run start:http
+
+# Or with custom port and host
+node dist/server.js --http --port 8080 --host 0.0.0.0
+```
+
+The HTTP server provides:
+- **SSE endpoint**: `http://host:port/sse` - Connect MCP clients here
+- **Health check**: `http://host:port/health` - Monitor server status
+
+To connect an MCP client to the HTTP server, use the SSE endpoint URL instead of stdio transport. The exact integration depends on your MCP client implementation.
+
+**Example with curl (health check)**:
+```bash
+curl http://127.0.0.1:3000/health
+```
+
+Response:
+```json
+{
+  "status": "ok",
+  "providers": 2
+}
 ```
 
 ## Usage Examples
@@ -210,6 +245,46 @@ For providers that support custom endpoints (e.g., Azure OpenAI):
     }
   ]
 }
+```
+
+## Transport Modes
+
+The server supports two transport modes to suit different deployment scenarios:
+
+### Stdio Transport (Default)
+
+- **Use case**: Local integration with MCP clients like Claude Desktop
+- **Advantages**: Simple setup, no network configuration needed
+- **How to run**: `npm start` or `npm run dev`
+- **Configuration**: Via Claude Desktop config or similar client configuration files
+
+### HTTP/SSE Transport
+
+- **Use case**: Hosting as a web service, remote access, containerized deployments
+- **Advantages**: Can be accessed over the network, supports multiple simultaneous clients
+- **How to run**: `npm run start:http` or `npm run dev:http`
+- **Configuration**: Command-line flags (`--port`, `--host`)
+
+**Command-line options for HTTP mode**:
+```bash
+node dist/server.js --http [--port PORT] [--host HOST]
+```
+
+Options:
+- `--http`: Enable HTTP/SSE transport mode
+- `--port PORT`: Specify port number (default: 3000)
+- `--host HOST`: Specify bind address (default: 127.0.0.1)
+
+Examples:
+```bash
+# Run on default port 3000, localhost only
+npm run start:http
+
+# Run on port 8080
+node dist/server.js --http --port 8080
+
+# Run on all interfaces (accessible from network)
+node dist/server.js --http --host 0.0.0.0 --port 8080
 ```
 
 ## Troubleshooting

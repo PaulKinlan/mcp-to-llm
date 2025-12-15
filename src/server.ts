@@ -2,11 +2,13 @@
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
+import express from 'express';
 import { loadConfig } from './config.js';
 import { initializeProvider, promptModel, ProviderInstance, PromptOptions } from './providers.js';
 
@@ -188,16 +190,92 @@ class LLMServer {
     }
   }
 
-  async run(): Promise<void> {
+  async runStdio(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
     console.error('MCP LLM Server running on stdio');
   }
+
+  async runHttp(port: number = 3000, host: string = '127.0.0.1'): Promise<void> {
+    const app = express();
+    app.use(express.json());
+
+    // Health check endpoint
+    app.get('/health', (_req, res) => {
+      res.json({ status: 'ok', providers: this.providers.size });
+    });
+
+    // SSE endpoint for MCP
+    app.get('/sse', async (req, res) => {
+      console.error('Client connected via SSE');
+      const transport = new SSEServerTransport('/message', res);
+      await this.server.connect(transport);
+      
+      transport.onclose = () => {
+        console.error('Client disconnected from SSE');
+      };
+    });
+
+    // Message endpoint for MCP
+    app.post('/message', async (req, res) => {
+      // This endpoint is handled by the SSE transport
+      res.status(405).json({ error: 'Use SSE endpoint' });
+    });
+
+    const server = app.listen(port, host, () => {
+      console.error(`MCP LLM Server running on http://${host}:${port}`);
+      console.error(`SSE endpoint: http://${host}:${port}/sse`);
+      console.error(`Health check: http://${host}:${port}/health`);
+    });
+
+    // Handle graceful shutdown
+    process.on('SIGTERM', () => {
+      console.error('SIGTERM received, shutting down gracefully');
+      server.close(() => {
+        console.error('Server closed');
+        process.exit(0);
+      });
+    });
+  }
+}
+
+// Parse command line arguments
+function parseArgs(): { mode: 'stdio' | 'http'; port?: number; host?: string } {
+  const args = process.argv.slice(2);
+  const mode = args.includes('--http') ? 'http' : 'stdio';
+  
+  let port = 3000;
+  let host = '127.0.0.1';
+
+  const portIndex = args.indexOf('--port');
+  if (portIndex !== -1 && args[portIndex + 1]) {
+    port = parseInt(args[portIndex + 1], 10);
+    if (isNaN(port) || port < 1 || port > 65535) {
+      console.error('Invalid port number');
+      process.exit(1);
+    }
+  }
+
+  const hostIndex = args.indexOf('--host');
+  if (hostIndex !== -1 && args[hostIndex + 1]) {
+    host = args[hostIndex + 1];
+  }
+
+  return { mode, port, host };
 }
 
 // Start the server
+const { mode, port, host } = parseArgs();
 const server = new LLMServer();
-server.run().catch((error) => {
-  console.error('Server error:', error);
-  process.exit(1);
-});
+
+if (mode === 'http') {
+  server.runHttp(port, host).catch((error) => {
+    console.error('Server error:', error);
+    process.exit(1);
+  });
+} else {
+  server.runStdio().catch((error) => {
+    console.error('Server error:', error);
+    process.exit(1);
+  });
+}
