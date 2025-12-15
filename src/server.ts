@@ -219,7 +219,11 @@ class LLMServer {
     // Message endpoint for MCP
     app.post('/message', async (req, res) => {
       // This endpoint is handled by the SSE transport
-      res.status(405).json({ error: 'Use SSE endpoint' });
+      res.status(405).json({ 
+        error: 'Direct POST to /message is not supported',
+        message: 'Please connect to the SSE endpoint first',
+        sseEndpoint: `http://${host}:${port}/sse`
+      });
     });
 
     const server = app.listen(port, host, () => {
@@ -249,9 +253,10 @@ function parseArgs(): { mode: 'stdio' | 'http'; port?: number; host?: string } {
 
   const portIndex = args.indexOf('--port');
   if (portIndex !== -1 && args[portIndex + 1]) {
-    port = parseInt(args[portIndex + 1], 10);
+    const portValue = args[portIndex + 1];
+    port = parseInt(portValue, 10);
     if (isNaN(port) || port < 1 || port > 65535) {
-      console.error('Invalid port number');
+      console.error(`Invalid port number: ${portValue}. Port must be between 1 and 65535.`);
       process.exit(1);
     }
   }
