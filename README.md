@@ -18,6 +18,27 @@ npm install
 npm run build
 ```
 
+## Quick Start
+
+1. Copy the example configuration:
+   ```bash
+   cp config.example.json config.json
+   ```
+
+2. Edit `config.json` with your API keys
+
+3. Test your configuration:
+   ```bash
+   npm run test-config
+   ```
+
+4. Start the server:
+   ```bash
+   npm start
+   ```
+
+See [SETUP.md](SETUP.md) for detailed setup instructions and usage with MCP clients.
+
 ## Configuration
 
 Create a `config.json` file in the project root (or specify a custom path via `MCP_LLM_CONFIG` environment variable):

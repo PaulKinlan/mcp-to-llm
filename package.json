@@ -11,7 +11,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "tsx src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test-config": "tsx src/test-config.ts"
   },
   "keywords": ["mcp", "llm", "ai", "openai", "anthropic", "google"],
   "author": "",
