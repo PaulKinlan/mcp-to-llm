@@ -12,20 +12,28 @@
     "start": "node dist/server.js",
     "dev": "tsx src/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test-config": "tsx src/test-config.ts"
+    "test-config": "tsx src/test-config.ts",
+    "example": "tsx examples/client-example.ts"
   },
-  "keywords": ["mcp", "llm", "ai", "openai", "anthropic", "google"],
+  "keywords": [
+    "mcp",
+    "llm",
+    "ai",
+    "openai",
+    "anthropic",
+    "google"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.56",
     "@ai-sdk/google": "^2.0.46",
     "@ai-sdk/openai": "^2.0.86",
-    "@modelcontextprotocol/sdk": "^1.24.3",
     "ai": "^5.0.113",
     "zod": "^4.2.0"
   },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.24.3",
     "@types/node": "^25.0.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
