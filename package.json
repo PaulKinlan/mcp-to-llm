@@ -1,0 +1,45 @@
+{
+  "name": "mcp-to-llm",
+  "version": "1.0.0",
+  "description": "Exposes LLMs via MCP servers",
+  "main": "dist/server.js",
+  "type": "module",
+  "bin": {
+    "mcp-to-llm": "dist/server.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "start:http": "node dist/server.js --http",
+    "dev": "tsx src/server.ts",
+    "dev:http": "tsx src/server.ts --http",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test-config": "tsx src/test-config.ts",
+    "example": "tsx examples/client-example.ts"
+  },
+  "keywords": [
+    "mcp",
+    "llm",
+    "ai",
+    "openai",
+    "anthropic",
+    "google"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.56",
+    "@ai-sdk/google": "^2.0.46",
+    "@ai-sdk/openai": "^2.0.86",
+    "@types/express": "^5.0.6",
+    "ai": "^5.0.113",
+    "express": "^5.2.1",
+    "zod": "^4.2.0"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.24.3",
+    "@types/node": "^25.0.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
