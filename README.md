@@ -259,6 +259,7 @@ Generate images using a configured image model.
 - `size` (optional): Image size as WxH (e.g., "1024x1024"). Provider-dependent.
 - `aspectRatio` (optional): Aspect ratio as W:H (e.g., "16:9"). Provider-dependent.
 - `seed` (optional): Seed for reproducible generation
+- `saveTo` (optional): File path to save the generated image to (e.g., `"/path/to/output.png"`). Parent directories are created automatically. When generating multiple images, a numeric suffix is added before the extension (e.g., `output-0.png`, `output-1.png`). If omitted, images are saved to the system temp directory.
 
 **Example**:
 ```json
@@ -266,7 +267,8 @@ Generate images using a configured image model.
   "providerId": "google-primary",
   "model": "gemini-2.5-flash-image",
   "prompt": "A serene mountain landscape at sunset",
-  "aspectRatio": "16:9"
+  "aspectRatio": "16:9",
+  "saveTo": "./landscape.png"
 }
 ```
 
