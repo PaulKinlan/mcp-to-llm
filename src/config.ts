@@ -9,6 +9,7 @@ export const ModelConfigSchema = z.union([
   z.object({
     id: z.string().describe('Model ID to expose'),
     description: z.string().optional().describe('Optional human-readable description of model capabilities'),
+    capability: z.enum(['text', 'image']).optional().describe('Model capability type: text generation or image generation (defaults to text)'),
   }),
 ]);
 

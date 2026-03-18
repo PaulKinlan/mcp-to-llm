@@ -10,7 +10,7 @@ import {
 import { z } from 'zod';
 import express from 'express';
 import { loadConfig } from './config.js';
-import { initializeProvider, promptModel, ProviderInstance, PromptOptions } from './providers.js';
+import { initializeProvider, promptModel, generateImageFromProvider, ProviderInstance, PromptOptions } from './providers.js';
 
 interface PromptArgs extends PromptOptions {
   providerId: string;
@@ -26,6 +26,17 @@ const PromptArgsSchema = z.object({
   systemPrompt: z.string().optional(),
   temperature: z.number().min(0).max(2).optional(),
   maxTokens: z.number().positive().optional(),
+});
+
+// Validation schema for image generation arguments
+const GenerateImageArgsSchema = z.object({
+  providerId: z.string().min(1),
+  model: z.string().min(1),
+  prompt: z.string().min(1),
+  n: z.number().int().min(1).max(10).optional(),
+  size: z.string().regex(/^\d+x\d+$/).optional(),
+  aspectRatio: z.string().regex(/^\d+:\d+$/).optional(),
+  seed: z.number().int().optional(),
 });
 
 /**
@@ -74,7 +85,7 @@ class LLMServer {
       tools: [
         {
           name: 'list',
-          description: 'List all configured LLM providers and their available models',
+          description: 'List all configured LLM providers and their available models. Each model in modelDetails includes a capability field indicating "text" (use with prompt tool) or "image" (use with generate_image tool).',
           inputSchema: {
             type: 'object',
             properties: {},
@@ -82,7 +93,7 @@ class LLMServer {
         },
         {
           name: 'prompt',
-          description: 'Send a prompt to a configured LLM and get a response',
+          description: 'Send a prompt to a configured LLM and get a text response. Only works with models that have capability "text".',
           inputSchema: {
             type: 'object',
             properties: {
@@ -114,6 +125,44 @@ class LLMServer {
             required: ['providerId', 'model', 'prompt'],
           },
         },
+        {
+          name: 'generate_image',
+          description: 'Generate images using a configured provider and image model. Use the list tool to find models with capability "image". Returns image content blocks.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              providerId: {
+                type: 'string',
+                description: 'The ID of the provider instance to use',
+              },
+              model: {
+                type: 'string',
+                description: 'The image model ID (e.g., gpt-image-1, imagen-4.0-generate-001)',
+              },
+              prompt: {
+                type: 'string',
+                description: 'The prompt describing the image to generate',
+              },
+              n: {
+                type: 'number',
+                description: 'Number of images to generate (1-10, default 1)',
+              },
+              size: {
+                type: 'string',
+                description: 'Image size as WxH (e.g., "1024x1024"). Provider-dependent.',
+              },
+              aspectRatio: {
+                type: 'string',
+                description: 'Aspect ratio as W:H (e.g., "16:9"). Provider-dependent.',
+              },
+              seed: {
+                type: 'number',
+                description: 'Optional seed for reproducible generation',
+              },
+            },
+            required: ['providerId', 'model', 'prompt'],
+          },
+        },
       ],
     }));
 
@@ -127,7 +176,10 @@ class LLMServer {
         
         case 'prompt':
           return this.handlePrompt(args);
-        
+
+        case 'generate_image':
+          return this.handleGenerateImage(args);
+
         default:
           throw new Error(`Unknown tool: ${name}`);
       }
@@ -188,6 +240,48 @@ class LLMServer {
       };
     } catch (error) {
       throw new Error(`Failed to prompt model: ${error}`);
+    }
+  }
+
+  private async handleGenerateImage(args: unknown) {
+    const validationResult = GenerateImageArgsSchema.safeParse(args);
+
+    if (!validationResult.success) {
+      throw new Error(`Invalid arguments: ${validationResult.error.message}`);
+    }
+
+    const { providerId, model, prompt, n, size, aspectRatio, seed } = validationResult.data;
+
+    const provider = this.providers.get(providerId);
+    if (!provider) {
+      throw new Error(`Provider not found: ${providerId}. Available providers: ${Array.from(this.providers.keys()).join(', ')}`);
+    }
+
+    const modelDetail = provider.modelDetails.find((m) => m.id === model);
+    if (!modelDetail) {
+      throw new Error(`Model ${model} not available for provider ${providerId}. Available models: ${provider.models.join(', ')}`);
+    }
+    if (modelDetail.capability !== 'image') {
+      throw new Error(`Model ${model} does not support image generation. Use the 'prompt' tool for text models.`);
+    }
+
+    try {
+      const images = await generateImageFromProvider(provider, model, prompt, {
+        n,
+        size,
+        aspectRatio,
+        seed,
+      });
+
+      return {
+        content: images.map((img) => ({
+          type: 'image' as const,
+          data: img.base64,
+          mimeType: img.mediaType,
+        })),
+      };
+    } catch (error) {
+      throw new Error(`Failed to generate image: ${error}`);
     }
   }
 
