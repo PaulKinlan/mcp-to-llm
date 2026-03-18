@@ -61,7 +61,7 @@ class LLMServer {
         this.providers.set(provider.id, provider);
       }
       
-      console.log(`Initialized ${this.providers.size} provider(s)`);
+      console.error(`Initialized ${this.providers.size} provider(s)`);
     } catch (error) {
       console.error('Failed to load configuration:', error);
       process.exit(1);
