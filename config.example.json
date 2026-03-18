@@ -7,11 +7,23 @@
       "models": [
         {
           "id": "gpt-5.4",
-          "description": "OpenAI flagship for complex reasoning, coding, and agentic workflows."
+          "description": "OpenAI flagship for complex reasoning, coding, and agentic workflows.",
+          "capability": "text"
         },
         {
           "id": "gpt-5.4-mini",
-          "description": "Lower-cost GPT-5.4 variant for faster high-throughput tasks."
+          "description": "Lower-cost GPT-5.4 variant for faster high-throughput tasks.",
+          "capability": "text"
+        },
+        {
+          "id": "gpt-5.4-nano",
+          "description": "Cheapest GPT-5.4 variant for lightweight summarization and classification.",
+          "capability": "text"
+        },
+        {
+          "id": "gpt-image-1",
+          "description": "OpenAI flagship image generation model.",
+          "capability": "image"
         }
       ]
     },
@@ -22,11 +34,18 @@
       "models": [
         {
           "id": "claude-opus-4-6",
-          "description": "Anthropic flagship for the most complex reasoning, coding, and agentic work."
+          "description": "Anthropic flagship for the most complex reasoning, coding, and agentic work.",
+          "capability": "text"
         },
         {
           "id": "claude-sonnet-4-6",
-          "description": "Anthropic balanced model with the best speed-intelligence tradeoff for general use."
+          "description": "Anthropic balanced model with the best speed-intelligence tradeoff for general use.",
+          "capability": "text"
+        },
+        {
+          "id": "claude-haiku-4-5",
+          "description": "Anthropic fastest model for lower-cost, high-volume tasks with strong baseline intelligence.",
+          "capability": "text"
         }
       ]
     },
@@ -37,11 +56,38 @@
       "models": [
         {
           "id": "gemini-3.1-pro-preview",
-          "description": "Latest Gemini 3.1 preview for advanced reasoning, coding, and multimodal work."
+          "description": "Latest Gemini 3.1 preview for advanced reasoning, coding, and multimodal work.",
+          "capability": "text"
         },
         {
           "id": "gemini-3-flash-preview",
-          "description": "Lower-latency Gemini 3 preview for fast multimodal and agentic tasks."
+          "description": "Lower-latency Gemini 3 preview for fast multimodal and agentic tasks.",
+          "capability": "text"
+        },
+        {
+          "id": "gemini-3.1-flash-lite-preview",
+          "description": "Lowest-cost Gemini 3.1 preview for high-volume general-purpose workloads.",
+          "capability": "text"
+        },
+        {
+          "id": "gemini-2.5-flash-image",
+          "description": "Gemini Nano Banana — fast, low-cost native image generation and editing.",
+          "capability": "image"
+        },
+        {
+          "id": "gemini-3-pro-image-preview",
+          "description": "Gemini Nano Banana Pro — highest-quality native image generation with advanced reasoning.",
+          "capability": "image"
+        },
+        {
+          "id": "gemini-3.1-flash-image-preview",
+          "description": "Gemini Nano Banana 2 — native image generation with 4K resolution support.",
+          "capability": "image"
+        },
+        {
+          "id": "imagen-4.0-generate-001",
+          "description": "Google Imagen 4 standard dedicated image generation.",
+          "capability": "image"
         }
       ]
     }
