@@ -8,9 +8,11 @@ An MCP (Model Context Protocol) server that exposes LLM (Large Language Model) p
 - **Multiple API Keys**: Support multiple instances of the same provider with different API keys
 - **Standardized Interface**: Built on the AI SDK for consistent API interactions
 - **Optional Model Metadata**: Add per-model descriptions so `list` can surface capabilities and intended use
-- **Two MCP Tools**:
-  - `list`: Lists all configured providers, their available models, and optional model descriptions
-  - `prompt`: Send prompts to any configured LLM instance
+- **Image Generation**: Generate images via OpenAI (gpt-image-1) and Google (Gemini Nano Banana, Imagen 4)
+- **Three MCP Tools**:
+  - `list`: Lists all configured providers, their available models, capabilities, and descriptions
+  - `prompt`: Send prompts to any configured text LLM instance
+  - `generate_image`: Generate images using configured image models
 
 ## Installation
 
@@ -84,11 +86,18 @@ Create a `config.json` file in the project root (or specify a custom path via `M
       "models": [
         {
           "id": "gemini-3.1-pro-preview",
-          "description": "Latest Gemini 3.1 preview for advanced reasoning, coding, and multimodal work."
+          "description": "Latest Gemini 3.1 preview for advanced reasoning, coding, and multimodal work.",
+          "capability": "text"
         },
         {
           "id": "gemini-3-flash-preview",
-          "description": "Lower-latency Gemini 3 preview for fast multimodal and agentic tasks."
+          "description": "Lower-latency Gemini 3 preview for fast multimodal and agentic tasks.",
+          "capability": "text"
+        },
+        {
+          "id": "gemini-2.5-flash-image",
+          "description": "Gemini Nano Banana — fast, low-cost native image generation.",
+          "capability": "image"
         }
       ]
     }
@@ -102,10 +111,10 @@ Create a `config.json` file in the project root (or specify a custom path via `M
 - `provider` (required): Provider type - `openai`, `anthropic`, or `google`
 - `apiKey` (required): API key for the provider
 - `baseURL` (optional): Custom base URL for the provider API
-- `models` (optional): List of models to expose. Each entry can be either a string model ID or an object with `id` and optional `description`
-- `description` (optional): Extra metadata surfaced by the `list` tool to describe capabilities or ideal use cases for a model
+- `models` (optional): List of models to expose. Each entry can be either a string model ID or an object with `id`, optional `description`, and optional `capability` (`"text"` or `"image"`, defaults to `"text"`)
+- `capability` (optional): Set to `"image"` for image generation models. The `list` tool surfaces this so callers know to use `generate_image` instead of `prompt`
 
-Model descriptions are metadata only. They help clients choose a model, but they do not change server behavior. For example, you can annotate a Gemini model as image-capable for routing purposes even though the current `prompt` tool still accepts text prompts and returns text output.
+If you omit `models`, the server uses built-in defaults that include both text and image models for each provider. If you specify custom models, include image models explicitly if you want image generation support.
 
 ### Alternative Configuration Methods
 
@@ -237,6 +246,34 @@ Send a prompt to a configured LLM and get a response.
   "temperature": 0.7
 }
 ```
+
+#### 3. `generate_image` Tool
+
+Generate images using a configured image model.
+
+**Input Parameters**:
+- `providerId` (required): The ID of the provider instance to use
+- `model` (required): The image model ID (e.g., "gpt-image-1", "gemini-2.5-flash-image", "imagen-4.0-generate-001")
+- `prompt` (required): The prompt describing the image to generate
+- `n` (optional): Number of images to generate (1-10)
+- `size` (optional): Image size as WxH (e.g., "1024x1024"). Provider-dependent.
+- `aspectRatio` (optional): Aspect ratio as W:H (e.g., "16:9"). Provider-dependent.
+- `seed` (optional): Seed for reproducible generation
+
+**Example**:
+```json
+{
+  "providerId": "google-primary",
+  "model": "gemini-2.5-flash-image",
+  "prompt": "A serene mountain landscape at sunset",
+  "aspectRatio": "16:9"
+}
+```
+
+**Available Image Models**:
+- **OpenAI**: `gpt-image-1`
+- **Google**: `gemini-2.5-flash-image` (Nano Banana), `gemini-3-pro-image-preview` (Nano Banana Pro), `gemini-3.1-flash-image-preview` (Nano Banana 2), `imagen-4.0-generate-001` (Imagen 4)
+- **Anthropic**: No image generation support
 
 ## Use Cases
 

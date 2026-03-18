@@ -227,10 +227,10 @@ Each provider in your `config.json` supports these fields:
 - `provider` (required): One of `openai`, `anthropic`, or `google`
 - `apiKey` (required): Your API key for the provider
 - `baseURL` (optional): Custom API endpoint URL
-- `models` (optional): Array of model IDs or `{ id, description }` objects to expose
-- `description` (optional): Metadata surfaced by `list` to explain capabilities or best-fit use cases
+- `models` (optional): Array of model IDs or `{ id, description, capability }` objects to expose. Defaults include both text and image models per provider.
+- `capability` (optional): `"text"` (default) or `"image"`. Image models are used with `generate_image`, text models with `prompt`.
 
-Descriptions are advisory metadata only. They help a client decide which model to choose, but they do not change how `prompt` executes. This is useful for annotating capabilities such as image generation support in a provider API while keeping the current server contract text-oriented.
+If you specify custom models, include image models explicitly for image generation support. Available image models include `gpt-image-1` (OpenAI), `gemini-2.5-flash-image` / `gemini-3-pro-image-preview` / `gemini-3.1-flash-image-preview` / `imagen-4.0-generate-001` (Google).
 
 ### Environment Variables
 

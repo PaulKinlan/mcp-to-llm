@@ -83,8 +83,23 @@ const DEFAULT_MODELS: Record<string, ModelDetails[]> = {
       capability: 'text',
     },
     {
+      id: 'gemini-2.5-flash-image',
+      description: 'Gemini Nano Banana — fast, low-cost native image generation and editing.',
+      capability: 'image',
+    },
+    {
+      id: 'gemini-3-pro-image-preview',
+      description: 'Gemini Nano Banana Pro — highest-quality native image generation with advanced reasoning.',
+      capability: 'image',
+    },
+    {
+      id: 'gemini-3.1-flash-image-preview',
+      description: 'Gemini Nano Banana 2 — native image generation with 4K resolution support.',
+      capability: 'image',
+    },
+    {
       id: 'imagen-4.0-generate-001',
-      description: 'Google Imagen 4 standard image generation.',
+      description: 'Google Imagen 4 standard dedicated image generation.',
       capability: 'image',
     },
   ],

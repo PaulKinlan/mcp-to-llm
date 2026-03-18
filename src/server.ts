@@ -219,10 +219,6 @@ class LLMServer {
       throw new Error(`Provider not found: ${providerId}. Available providers: ${Array.from(this.providers.keys()).join(', ')}`);
     }
 
-    if (!provider.models.includes(model)) {
-      throw new Error(`Model ${model} not available for provider ${providerId}. Available models: ${provider.models.join(', ')}`);
-    }
-
     try {
       const response = await promptModel(provider, model, prompt, {
         systemPrompt,
@@ -257,11 +253,12 @@ class LLMServer {
       throw new Error(`Provider not found: ${providerId}. Available providers: ${Array.from(this.providers.keys()).join(', ')}`);
     }
 
-    const modelDetail = provider.modelDetails.find((m) => m.id === model);
-    if (!modelDetail) {
-      throw new Error(`Model ${model} not available for provider ${providerId}. Available models: ${provider.models.join(', ')}`);
+    if (!provider.getImageModel) {
+      throw new Error(`Provider ${providerId} does not support image generation.`);
     }
-    if (modelDetail.capability !== 'image') {
+
+    const modelDetail = provider.modelDetails.find((m) => m.id === model);
+    if (modelDetail && modelDetail.capability !== 'image') {
       throw new Error(`Model ${model} does not support image generation. Use the 'prompt' tool for text models.`);
     }
 
