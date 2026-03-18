@@ -9,6 +9,9 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import express from 'express';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import { loadConfig } from './config.js';
 import { initializeProvider, promptModel, generateImageFromProvider, ProviderInstance, PromptOptions } from './providers.js';
 
@@ -37,6 +40,7 @@ const GenerateImageArgsSchema = z.object({
   size: z.string().regex(/^\d+x\d+$/).optional(),
   aspectRatio: z.string().regex(/^\d+:\d+$/).optional(),
   seed: z.number().int().optional(),
+  saveTo: z.string().min(1).optional(),
 });
 
 /**
@@ -159,6 +163,10 @@ class LLMServer {
                 type: 'number',
                 description: 'Optional seed for reproducible generation',
               },
+              saveTo: {
+                type: 'string',
+                description: 'Optional file path to save the generated image to (e.g., "/path/to/file.png"). When multiple images are generated, a numeric suffix is added before the extension (e.g., file-0.png, file-1.png). Parent directories are created automatically.',
+              },
             },
             required: ['providerId', 'model', 'prompt'],
           },
@@ -246,7 +254,7 @@ class LLMServer {
       throw new Error(`Invalid arguments: ${validationResult.error.message}`);
     }
 
-    const { providerId, model, prompt, n, size, aspectRatio, seed } = validationResult.data;
+    const { providerId, model, prompt, n, size, aspectRatio, seed, saveTo } = validationResult.data;
 
     const provider = this.providers.get(providerId);
     if (!provider) {
@@ -270,12 +278,69 @@ class LLMServer {
         seed,
       });
 
+      const mimeToExt: Record<string, string> = {
+        'image/png': '.png',
+        'image/jpeg': '.jpg',
+        'image/webp': '.webp',
+        'image/gif': '.gif',
+      };
+
+      const savedPaths: string[] = [];
+
+      if (saveTo) {
+        // Save to user-specified path(s)
+        const parsedPath = path.parse(saveTo);
+        const dir = parsedPath.dir || '.';
+        fs.mkdirSync(dir, { recursive: true });
+
+        images.forEach((img, i) => {
+          let filePath: string;
+          if (images.length === 1) {
+            filePath = saveTo;
+          } else {
+            filePath = path.join(dir, `${parsedPath.name}-${i}${parsedPath.ext || mimeToExt[img.mimeType] || '.png'}`);
+          }
+          fs.writeFileSync(filePath, Buffer.from(img.base64, 'base64'));
+          savedPaths.push(filePath);
+        });
+      } else {
+        // Fall back to temp directory
+        const tmpDir = os.tmpdir();
+        images.forEach((img, i) => {
+          const ext = mimeToExt[img.mimeType] ?? '.png';
+          const filename = `mcp-image-${Date.now()}-${i}${ext}`;
+          const filePath = path.join(tmpDir, filename);
+          fs.writeFileSync(filePath, Buffer.from(img.base64, 'base64'));
+          savedPaths.push(filePath);
+        });
+      }
+
+      const imageContent = images.map((img) => ({
+        type: 'image' as const,
+        data: img.base64,
+        mimeType: img.mimeType,
+        annotations: {
+          audience: ['user'] as string[],
+          priority: 0.9,
+        },
+      }));
+
+      const fileList = savedPaths.map((p) => `  - ${p}`).join('\n');
+      const savedLabel = saveTo ? 'Saved to:' : 'Saved to temporary file(s):';
+
       return {
-        content: images.map((img) => ({
-          type: 'image' as const,
-          data: img.base64,
-          mimeType: img.mediaType,
-        })),
+        content: [
+          ...imageContent,
+          {
+            type: 'text' as const,
+            text: [
+              `Generated ${images.length} image(s) (${images[0].mimeType}).`,
+              '',
+              savedLabel,
+              fileList,
+            ].join('\n'),
+          },
+        ],
       };
     } catch (error) {
       throw new Error(`Failed to generate image: ${error}`);

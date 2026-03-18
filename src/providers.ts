@@ -224,7 +224,7 @@ export interface GenerateImageOptions {
 
 export interface GeneratedImageResult {
   base64: string;
-  mediaType: string;
+  mimeType: string;
 }
 
 /**
@@ -253,6 +253,6 @@ export async function generateImageFromProvider(
 
   return result.images.map((img) => ({
     base64: img.base64,
-    mediaType: img.mediaType,
+    mimeType: img.mediaType ?? 'image/png',
   }));
 }
