@@ -92,7 +92,7 @@ class LLMServer {
               },
               model: {
                 type: 'string',
-                description: 'The model ID to use (e.g., gpt-4o, claude-3-5-sonnet-20241022)',
+                description: 'The model ID to use (e.g., gpt-5.4, claude-sonnet-4-0, gemini-3.1-pro-preview)',
               },
               prompt: {
                 type: 'string',
@@ -139,6 +139,7 @@ class LLMServer {
       id: p.id,
       provider: p.provider,
       models: p.models,
+      modelDetails: p.modelDetails,
     }));
 
     return {

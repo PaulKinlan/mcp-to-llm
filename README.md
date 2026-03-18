@@ -7,8 +7,9 @@ An MCP (Model Context Protocol) server that exposes LLM (Large Language Model) p
 - **Multiple Provider Support**: Configure OpenAI, Anthropic, and Google AI providers
 - **Multiple API Keys**: Support multiple instances of the same provider with different API keys
 - **Standardized Interface**: Built on the AI SDK for consistent API interactions
+- **Optional Model Metadata**: Add per-model descriptions so `list` can surface capabilities and intended use
 - **Two MCP Tools**:
-  - `list`: Lists all configured providers and their available models
+  - `list`: Lists all configured providers, their available models, and optional model descriptions
   - `prompt`: Send prompts to any configured LLM instance
 
 ## Installation
@@ -50,25 +51,46 @@ Create a `config.json` file in the project root (or specify a custom path via `M
       "id": "openai-primary",
       "provider": "openai",
       "apiKey": "sk-...",
-      "models": ["gpt-4o", "gpt-4o-mini"]
-    },
-    {
-      "id": "openai-secondary",
-      "provider": "openai",
-      "apiKey": "sk-...",
-      "models": ["gpt-3.5-turbo"]
+      "models": [
+        {
+          "id": "gpt-5.4",
+          "description": "OpenAI flagship for complex reasoning, coding, and agentic workflows."
+        },
+        {
+          "id": "gpt-5.4-mini",
+          "description": "Lower-cost GPT-5.4 variant for faster high-throughput tasks."
+        }
+      ]
     },
     {
       "id": "anthropic-primary",
       "provider": "anthropic",
       "apiKey": "sk-ant-...",
-      "models": ["claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022"]
+      "models": [
+        {
+          "id": "claude-opus-4-1",
+          "description": "Anthropic flagship for advanced reasoning and complex coding work."
+        },
+        {
+          "id": "claude-sonnet-4-0",
+          "description": "Balanced Claude 4 model with strong reasoning and better latency-cost tradeoffs."
+        }
+      ]
     },
     {
       "id": "google-primary",
       "provider": "google",
       "apiKey": "...",
-      "models": ["gemini-1.5-pro", "gemini-1.5-flash"]
+      "models": [
+        {
+          "id": "gemini-3.1-pro-preview",
+          "description": "Latest Gemini 3.1 preview for advanced reasoning, coding, and multimodal work."
+        },
+        {
+          "id": "gemini-3-flash-preview",
+          "description": "Lower-latency Gemini 3 preview for fast multimodal and agentic tasks."
+        }
+      ]
     }
   ]
 }
@@ -80,14 +102,17 @@ Create a `config.json` file in the project root (or specify a custom path via `M
 - `provider` (required): Provider type - `openai`, `anthropic`, or `google`
 - `apiKey` (required): API key for the provider
 - `baseURL` (optional): Custom base URL for the provider API
-- `models` (optional): List of models to expose. If not specified, defaults to common models for that provider
+- `models` (optional): List of models to expose. Each entry can be either a string model ID or an object with `id` and optional `description`
+- `description` (optional): Extra metadata surfaced by the `list` tool to describe capabilities or ideal use cases for a model
+
+Model descriptions are metadata only. They help clients choose a model, but they do not change server behavior. For example, you can annotate a Gemini model as image-capable for routing purposes even though the current `prompt` tool still accepts text prompts and returns text output.
 
 ### Alternative Configuration Methods
 
 You can also provide configuration via the `MCP_LLM_PROVIDERS` environment variable as a JSON string:
 
 ```bash
-export MCP_LLM_PROVIDERS='{"providers":[{"id":"openai-primary","provider":"openai","apiKey":"sk-...","models":["gpt-4o"]}]}'
+export MCP_LLM_PROVIDERS='{"providers":[{"id":"openai-primary","provider":"openai","apiKey":"sk-...","models":[{"id":"gpt-5.4","description":"Flagship reasoning model"}]}]}'
 ```
 
 Or specify a custom config file path:
@@ -148,11 +173,11 @@ The HTTP server provides:
 
 #### 1. `list` Tool
 
-Lists all configured LLM providers and their available models.
+Lists all configured LLM providers, their available model IDs, and any optional model descriptions.
 
 **Input**: None
 
-**Output**: JSON array of providers with their IDs, types, and available models
+**Output**: JSON array of providers with their IDs, types, available model IDs, and optional `modelDetails`
 
 **Example Response**:
 ```json
@@ -160,12 +185,32 @@ Lists all configured LLM providers and their available models.
   {
     "id": "openai-primary",
     "provider": "openai",
-    "models": ["gpt-4o", "gpt-4o-mini"]
+    "models": ["gpt-5.4", "gpt-5.4-mini"],
+    "modelDetails": [
+      {
+        "id": "gpt-5.4",
+        "description": "OpenAI flagship for complex reasoning, coding, and agentic workflows."
+      },
+      {
+        "id": "gpt-5.4-mini",
+        "description": "Lower-cost GPT-5.4 variant for faster high-throughput tasks."
+      }
+    ]
   },
   {
     "id": "anthropic-primary",
     "provider": "anthropic",
-    "models": ["claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022"]
+    "models": ["claude-opus-4-1", "claude-sonnet-4-0"],
+    "modelDetails": [
+      {
+        "id": "claude-opus-4-1",
+        "description": "Anthropic flagship for advanced reasoning and complex coding work."
+      },
+      {
+        "id": "claude-sonnet-4-0",
+        "description": "Balanced Claude 4 model with strong reasoning and better latency-cost tradeoffs."
+      }
+    ]
   }
 ]
 ```
@@ -176,7 +221,7 @@ Send a prompt to a configured LLM and get a response.
 
 **Input Parameters**:
 - `providerId` (required): The ID of the provider instance to use
-- `model` (required): The model ID to use (e.g., "gpt-4o", "claude-3-5-sonnet-20241022")
+- `model` (required): The model ID to use (e.g., "gpt-5.4", "claude-sonnet-4-0", "gemini-3.1-pro-preview")
 - `prompt` (required): The prompt to send to the LLM
 - `systemPrompt` (optional): System prompt to set context
 - `temperature` (optional): Temperature for response randomness (0.0-2.0)
@@ -186,7 +231,7 @@ Send a prompt to a configured LLM and get a response.
 ```json
 {
   "providerId": "openai-primary",
-  "model": "gpt-4o",
+  "model": "gpt-5.4",
   "prompt": "What is the capital of France?",
   "systemPrompt": "You are a helpful geography assistant.",
   "temperature": 0.7

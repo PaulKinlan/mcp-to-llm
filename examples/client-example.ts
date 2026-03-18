@@ -69,13 +69,20 @@ async function main() {
         console.log(`\n  Provider: ${provider.id}`);
         console.log(`  Type: ${provider.provider}`);
         console.log(`  Models: ${provider.models.join(', ')}`);
+        if (Array.isArray(provider.modelDetails)) {
+          provider.modelDetails.forEach((model: any) => {
+            if (model.description) {
+              console.log(`    - ${model.id}: ${model.description}`);
+            }
+          });
+        }
       });
       console.log('\n');
 
       // Example 2: Send a prompt (if providers are configured)
       if (providers.length > 0) {
         const firstProvider = providers[0];
-        const firstModel = firstProvider.models[0];
+        const firstModel = firstProvider.modelDetails?.[0]?.id || firstProvider.models[0];
         
         console.log('Example 2: Sending a prompt');
         console.log('='.repeat(50));

@@ -7,6 +7,7 @@ This directory contains example code demonstrating how to use the mcp-to-llm ser
 The `client-example.ts` demonstrates how to:
 - Connect to the MCP server programmatically
 - List available providers and models
+- Read optional model descriptions from `list`
 - Send prompts to configured LLMs
 
 ### Running the Example
@@ -60,7 +61,7 @@ const response = await client.callTool({
   name: 'prompt', 
   arguments: {
     providerId: 'openai-primary',
-    model: 'gpt-4o',
+    model: 'gpt-5.4',
     prompt: 'Hello!'
   }
 });

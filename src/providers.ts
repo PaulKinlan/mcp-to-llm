@@ -2,12 +2,18 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText, LanguageModel } from 'ai';
-import { ProviderConfig } from './config.js';
+import { ModelConfig, ProviderConfig } from './config.js';
+
+export interface ModelDetails {
+  id: string;
+  description?: string;
+}
 
 export interface ProviderInstance {
   id: string;
   provider: string;
   models: string[];
+  modelDetails: ModelDetails[];
   getModel: (modelId: string) => LanguageModel;
 }
 
@@ -16,21 +22,74 @@ type ProviderFactory = (modelId: string) => LanguageModel;
 /**
  * Default models for each provider if not specified in config
  */
-const DEFAULT_MODELS: Record<string, string[]> = {
-  openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-  anthropic: ['claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229'],
-  google: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro'],
+const DEFAULT_MODELS: Record<string, ModelDetails[]> = {
+  openai: [
+    {
+      id: 'gpt-5.4',
+      description: 'OpenAI flagship for complex reasoning, coding, and agentic workflows.',
+    },
+    {
+      id: 'gpt-5.4-mini',
+      description: 'Lower-cost GPT-5.4 variant for faster high-throughput tasks.',
+    },
+    {
+      id: 'gpt-5.4-nano',
+      description: 'Cheapest GPT-5.4 variant for lightweight summarization and classification.',
+    },
+  ],
+  anthropic: [
+    {
+      id: 'claude-opus-4-1',
+      description: 'Anthropic flagship for advanced reasoning and complex coding work.',
+    },
+    {
+      id: 'claude-sonnet-4-0',
+      description: 'Balanced Claude 4 model with strong reasoning and better latency-cost tradeoffs.',
+    },
+    {
+      id: 'claude-3-5-haiku-latest',
+      description: 'Fast, lower-cost Anthropic model for simpler high-volume tasks.',
+    },
+  ],
+  google: [
+    {
+      id: 'gemini-3.1-pro-preview',
+      description: 'Latest Gemini 3.1 preview for advanced reasoning, coding, and multimodal work.',
+    },
+    {
+      id: 'gemini-3-flash-preview',
+      description: 'Lower-latency Gemini 3 preview for fast multimodal and agentic tasks.',
+    },
+    {
+      id: 'gemini-3.1-flash-lite-preview',
+      description: 'Lowest-cost Gemini 3.1 preview for high-volume general-purpose workloads.',
+    },
+  ],
 };
+
+function resolveModels(models: ModelConfig[] | undefined, provider: string): ModelDetails[] {
+  const sourceModels = models ?? DEFAULT_MODELS[provider];
+
+  if (!sourceModels) {
+    return [];
+  }
+
+  return sourceModels.map((model) =>
+    typeof model === 'string' ? { id: model } : { ...model }
+  );
+}
 
 /**
  * Initialize a provider instance based on configuration
  */
 export function initializeProvider(config: ProviderConfig): ProviderInstance {
-  const models = config.models || DEFAULT_MODELS[config.provider];
+  const modelDetails = resolveModels(config.models, config.provider);
   
-  if (!models || models.length === 0) {
+  if (modelDetails.length === 0) {
     throw new Error(`No models configured for provider ${config.id} and no default models available`);
   }
+
+  const models = modelDetails.map((model) => model.id);
   
   let provider: ProviderFactory;
   
@@ -64,6 +123,7 @@ export function initializeProvider(config: ProviderConfig): ProviderInstance {
     id: config.id,
     provider: config.provider,
     models,
+    modelDetails,
     getModel: (modelId: string) => provider(modelId),
   };
 }

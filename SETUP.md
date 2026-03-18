@@ -27,13 +27,27 @@ This guide will help you set up and use the mcp-to-llm server with various MCP c
          "id": "openai-primary",
          "provider": "openai",
          "apiKey": "sk-...",
-         "models": ["gpt-4o", "gpt-4o-mini"]
+         "models": [
+           {
+             "id": "gpt-5.4",
+             "description": "OpenAI flagship for complex reasoning, coding, and agentic workflows."
+           },
+           {
+             "id": "gpt-5.4-mini",
+             "description": "Lower-cost GPT-5.4 variant for faster high-throughput tasks."
+           }
+         ]
        },
        {
          "id": "anthropic-primary",
          "provider": "anthropic",
          "apiKey": "sk-ant-...",
-         "models": ["claude-3-5-sonnet-20241022"]
+         "models": [
+           {
+             "id": "claude-sonnet-4-0",
+             "description": "Balanced Claude 4 model with strong reasoning and better latency-cost tradeoffs."
+           }
+         ]
        }
      ]
    }
@@ -102,7 +116,7 @@ const promptResult = await client.callTool({
   name: 'prompt',
   arguments: {
     providerId: 'openai-primary',
-    model: 'gpt-4o',
+    model: 'gpt-5.4',
     prompt: 'Hello, how are you?',
     temperature: 0.7
   }
@@ -159,12 +173,28 @@ Response:
   {
     "id": "openai-primary",
     "provider": "openai",
-    "models": ["gpt-4o", "gpt-4o-mini"]
+    "models": ["gpt-5.4", "gpt-5.4-mini"],
+    "modelDetails": [
+      {
+        "id": "gpt-5.4",
+        "description": "OpenAI flagship for complex reasoning, coding, and agentic workflows."
+      },
+      {
+        "id": "gpt-5.4-mini",
+        "description": "Lower-cost GPT-5.4 variant for faster high-throughput tasks."
+      }
+    ]
   },
   {
     "id": "anthropic-primary",
     "provider": "anthropic",
-    "models": ["claude-3-5-sonnet-20241022"]
+    "models": ["claude-sonnet-4-0"],
+    "modelDetails": [
+      {
+        "id": "claude-sonnet-4-0",
+        "description": "Balanced Claude 4 model with strong reasoning and better latency-cost tradeoffs."
+      }
+    ]
   }
 ]
 ```
@@ -178,7 +208,7 @@ Use the `prompt` tool to interact with an LLM:
   "name": "prompt",
   "arguments": {
     "providerId": "openai-primary",
-    "model": "gpt-4o",
+    "model": "gpt-5.4",
     "prompt": "Explain quantum computing in simple terms",
     "systemPrompt": "You are a helpful science teacher",
     "temperature": 0.7,
@@ -197,7 +227,10 @@ Each provider in your `config.json` supports these fields:
 - `provider` (required): One of `openai`, `anthropic`, or `google`
 - `apiKey` (required): Your API key for the provider
 - `baseURL` (optional): Custom API endpoint URL
-- `models` (optional): Array of model IDs to expose
+- `models` (optional): Array of model IDs or `{ id, description }` objects to expose
+- `description` (optional): Metadata surfaced by `list` to explain capabilities or best-fit use cases
+
+Descriptions are advisory metadata only. They help a client decide which model to choose, but they do not change how `prompt` executes. This is useful for annotating capabilities such as image generation support in a provider API while keeping the current server contract text-oriented.
 
 ### Environment Variables
 
@@ -217,13 +250,13 @@ You can configure multiple instances of the same provider with different API key
       "id": "openai-work",
       "provider": "openai",
       "apiKey": "sk-work-key...",
-      "models": ["gpt-4o"]
+      "models": ["gpt-5.4"]
     },
     {
       "id": "openai-personal",
       "provider": "openai",
       "apiKey": "sk-personal-key...",
-      "models": ["gpt-4o-mini"]
+      "models": ["gpt-5.4-mini"]
     }
   ]
 }
@@ -241,7 +274,7 @@ For providers that support custom endpoints (e.g., Azure OpenAI):
       "provider": "openai",
       "apiKey": "your-azure-key",
       "baseURL": "https://your-resource.openai.azure.com/openai/deployments/your-deployment",
-      "models": ["gpt-4"]
+      "models": ["gpt-5.4"]
     }
   ]
 }

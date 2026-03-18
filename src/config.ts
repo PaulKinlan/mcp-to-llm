@@ -4,12 +4,20 @@ import fs from 'fs';
 /**
  * Configuration schema for LLM providers
  */
+export const ModelConfigSchema = z.union([
+  z.string(),
+  z.object({
+    id: z.string().describe('Model ID to expose'),
+    description: z.string().optional().describe('Optional human-readable description of model capabilities'),
+  }),
+]);
+
 export const ProviderConfigSchema = z.object({
   id: z.string().describe('Unique identifier for this provider instance'),
   provider: z.enum(['openai', 'anthropic', 'google']).describe('Provider type'),
   apiKey: z.string().describe('API key for the provider'),
   baseURL: z.string().optional().describe('Optional custom base URL'),
-  models: z.array(z.string()).optional().describe('Optional list of models to expose'),
+  models: z.array(ModelConfigSchema).optional().describe('Optional list of models to expose'),
 });
 
 export const ConfigSchema = z.object({
@@ -18,6 +26,7 @@ export const ConfigSchema = z.object({
 
 export type ProviderConfig = z.infer<typeof ProviderConfigSchema>;
 export type Config = z.infer<typeof ConfigSchema>;
+export type ModelConfig = z.infer<typeof ModelConfigSchema>;
 
 /**
  * Load configuration from environment or file

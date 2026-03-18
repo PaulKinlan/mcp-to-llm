@@ -29,6 +29,11 @@ try {
     try {
       const provider = initializeProvider(providerConfig);
       console.log(`  Models: ${provider.models.join(', ')}`);
+      for (const model of provider.modelDetails) {
+        if (model.description) {
+          console.log(`    - ${model.id}: ${model.description}`);
+        }
+      }
       console.log('  ✓ Provider initialized successfully\n');
     } catch (error) {
       console.error(`  ✗ Failed to initialize provider: ${error}\n`);

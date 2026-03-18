@@ -4,25 +4,46 @@
       "id": "openai-primary",
       "provider": "openai",
       "apiKey": "sk-...",
-      "models": ["gpt-4o", "gpt-4o-mini"]
-    },
-    {
-      "id": "openai-secondary",
-      "provider": "openai",
-      "apiKey": "sk-...",
-      "models": ["gpt-3.5-turbo"]
+      "models": [
+        {
+          "id": "gpt-5.4",
+          "description": "OpenAI flagship for complex reasoning, coding, and agentic workflows."
+        },
+        {
+          "id": "gpt-5.4-mini",
+          "description": "Lower-cost GPT-5.4 variant for faster high-throughput tasks."
+        }
+      ]
     },
     {
       "id": "anthropic-primary",
       "provider": "anthropic",
       "apiKey": "sk-ant-...",
-      "models": ["claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022"]
+      "models": [
+        {
+          "id": "claude-opus-4-1",
+          "description": "Anthropic flagship for advanced reasoning and complex coding work."
+        },
+        {
+          "id": "claude-sonnet-4-0",
+          "description": "Balanced Claude 4 model with strong reasoning and better latency-cost tradeoffs."
+        }
+      ]
     },
     {
       "id": "google-primary",
       "provider": "google",
       "apiKey": "...",
-      "models": ["gemini-1.5-pro", "gemini-1.5-flash"]
+      "models": [
+        {
+          "id": "gemini-3.1-pro-preview",
+          "description": "Latest Gemini 3.1 preview for advanced reasoning, coding, and multimodal work."
+        },
+        {
+          "id": "gemini-3-flash-preview",
+          "description": "Lower-latency Gemini 3 preview for fast multimodal and agentic tasks."
+        }
+      ]
     }
   ]
 }
