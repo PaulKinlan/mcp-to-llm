@@ -68,12 +68,12 @@ Create a `config.json` file in the project root (or specify a custom path via `M
       "apiKey": "sk-ant-...",
       "models": [
         {
-          "id": "claude-opus-4-1",
-          "description": "Anthropic flagship for advanced reasoning and complex coding work."
+          "id": "claude-opus-4-6",
+          "description": "Anthropic flagship for the most complex reasoning, coding, and agentic work."
         },
         {
-          "id": "claude-sonnet-4-0",
-          "description": "Balanced Claude 4 model with strong reasoning and better latency-cost tradeoffs."
+          "id": "claude-sonnet-4-6",
+          "description": "Anthropic balanced model with the best speed-intelligence tradeoff for general use."
         }
       ]
     },
@@ -200,15 +200,15 @@ Lists all configured LLM providers, their available model IDs, and any optional 
   {
     "id": "anthropic-primary",
     "provider": "anthropic",
-    "models": ["claude-opus-4-1", "claude-sonnet-4-0"],
+    "models": ["claude-opus-4-6", "claude-sonnet-4-6"],
     "modelDetails": [
       {
-        "id": "claude-opus-4-1",
-        "description": "Anthropic flagship for advanced reasoning and complex coding work."
+        "id": "claude-opus-4-6",
+        "description": "Anthropic flagship for the most complex reasoning, coding, and agentic work."
       },
       {
-        "id": "claude-sonnet-4-0",
-        "description": "Balanced Claude 4 model with strong reasoning and better latency-cost tradeoffs."
+        "id": "claude-sonnet-4-6",
+        "description": "Anthropic balanced model with the best speed-intelligence tradeoff for general use."
       }
     ]
   }
@@ -221,7 +221,7 @@ Send a prompt to a configured LLM and get a response.
 
 **Input Parameters**:
 - `providerId` (required): The ID of the provider instance to use
-- `model` (required): The model ID to use (e.g., "gpt-5.4", "claude-sonnet-4-0", "gemini-3.1-pro-preview")
+- `model` (required): The model ID to use (e.g., "gpt-5.4", "claude-sonnet-4-6", "gemini-3.1-pro-preview")
 - `prompt` (required): The prompt to send to the LLM
 - `systemPrompt` (optional): System prompt to set context
 - `temperature` (optional): Temperature for response randomness (0.0-2.0)

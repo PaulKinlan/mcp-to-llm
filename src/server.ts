@@ -92,7 +92,7 @@ class LLMServer {
               },
               model: {
                 type: 'string',
-                description: 'The model ID to use (e.g., gpt-5.4, claude-sonnet-4-0, gemini-3.1-pro-preview)',
+                description: 'The model ID to use (e.g., gpt-5.4, claude-sonnet-4-6, gemini-3.1-pro-preview)',
               },
               prompt: {
                 type: 'string',

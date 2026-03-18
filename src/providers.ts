@@ -39,16 +39,16 @@ const DEFAULT_MODELS: Record<string, ModelDetails[]> = {
   ],
   anthropic: [
     {
-      id: 'claude-opus-4-1',
-      description: 'Anthropic flagship for advanced reasoning and complex coding work.',
+      id: 'claude-opus-4-6',
+      description: 'Anthropic flagship for the most complex reasoning, coding, and agentic work.',
     },
     {
-      id: 'claude-sonnet-4-0',
-      description: 'Balanced Claude 4 model with strong reasoning and better latency-cost tradeoffs.',
+      id: 'claude-sonnet-4-6',
+      description: 'Anthropic balanced model with the best speed-intelligence tradeoff for general use.',
     },
     {
-      id: 'claude-3-5-haiku-latest',
-      description: 'Fast, lower-cost Anthropic model for simpler high-volume tasks.',
+      id: 'claude-haiku-4-5',
+      description: 'Anthropic fastest model for lower-cost, high-volume tasks with strong baseline intelligence.',
     },
   ],
   google: [

@@ -21,12 +21,12 @@
       "apiKey": "sk-ant-...",
       "models": [
         {
-          "id": "claude-opus-4-1",
-          "description": "Anthropic flagship for advanced reasoning and complex coding work."
+          "id": "claude-opus-4-6",
+          "description": "Anthropic flagship for the most complex reasoning, coding, and agentic work."
         },
         {
-          "id": "claude-sonnet-4-0",
-          "description": "Balanced Claude 4 model with strong reasoning and better latency-cost tradeoffs."
+          "id": "claude-sonnet-4-6",
+          "description": "Anthropic balanced model with the best speed-intelligence tradeoff for general use."
         }
       ]
     },

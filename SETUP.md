@@ -44,8 +44,8 @@ This guide will help you set up and use the mcp-to-llm server with various MCP c
          "apiKey": "sk-ant-...",
          "models": [
            {
-             "id": "claude-sonnet-4-0",
-             "description": "Balanced Claude 4 model with strong reasoning and better latency-cost tradeoffs."
+             "id": "claude-sonnet-4-6",
+             "description": "Anthropic balanced model with the best speed-intelligence tradeoff for general use."
            }
          ]
        }
@@ -188,11 +188,11 @@ Response:
   {
     "id": "anthropic-primary",
     "provider": "anthropic",
-    "models": ["claude-sonnet-4-0"],
+    "models": ["claude-sonnet-4-6"],
     "modelDetails": [
       {
-        "id": "claude-sonnet-4-0",
-        "description": "Balanced Claude 4 model with strong reasoning and better latency-cost tradeoffs."
+        "id": "claude-sonnet-4-6",
+        "description": "Anthropic balanced model with the best speed-intelligence tradeoff for general use."
       }
     ]
   }
